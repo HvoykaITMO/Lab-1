@@ -5,6 +5,9 @@ from time import sleep
 
 # CONSTANTS
 
+# TIME
+SWAP_SLIDE_TIME = 7
+
 # FOR FLAG
 FLAG_LENGTH = 35
 FLAG_WIDTH = 2
@@ -14,13 +17,11 @@ COLOR_ORDER = ('red',
                'blue')
 
 # FOR PATTERN
-COEFF = 3
-HEIGHT_PAT = 10
-K = HEIGHT_PAT * COEFF
-SYMBOL_PAT = '\u001b[40m \u001b[0m' * 2
+SYMBOL_PAT = '\u001b[40m   \u001b[0m'
+PATTERN_REPEAT_AMOUNT = 4
 
 # FOR GRAPH Y=2X
-SYMBOL_GRAPH = '\u001b[48;5;231m \u001b[0m' * 2
+SYMBOL_GRAPH = '\u001b[48;5;231m   \u001b[0m'
 HEIGHT_GRAPH = 9
 
 # FOR CHART
@@ -36,23 +37,41 @@ def draw_netherlands_flag():
             print(COLOR_ID[COLOR_ORDER[i]] + ' ' * FLAG_LENGTH + COLOR_ID['default'])
 
 
-def draw_pattern_c():
-    k, step = K, COEFF
-    t = j = 0
-    for i in range(HEIGHT_PAT + 1):
-        print(' ' * j + SYMBOL_PAT + ' ' * abs(k) + SYMBOL_PAT + ' ' * t + SYMBOL_PAT + ' ' * abs(k) + SYMBOL_PAT)
-        k -= step * 2
-        if i < HEIGHT_PAT // 2:
-            j += step
-            t += step * 2
-        else:
-            j -= step
-            t -= step * 2
+def draw_pattern_c(amount=PATTERN_REPEAT_AMOUNT):
+    step = SYMBOL_PAT.count(' ')
+    total_gaps = step * 7
+
+    k = total_gaps
+    j = 0
+    i = 1
+    step = SYMBOL_PAT.count(' ')
+    while abs(k) < total_gaps + 1:
+        if k < 0 < i:
+            line = (' ' * j + SYMBOL_PAT).ljust(total_gaps + len(SYMBOL_PAT) + step, ' ')
+            print(line * amount)
+            k += step * 2
+            i = -1
+            j += step * i
+            continue
+        line = (' ' * j + SYMBOL_PAT + ' ' * abs(k) + SYMBOL_PAT).ljust(total_gaps + len(SYMBOL_PAT) * 2, ' ')
+        print(line * amount)
+        k += step * 2 * (-i)
+        j += step * i
 
 
 def draw_graph_2x():
-    for i in range(HEIGHT_GRAPH, -1, -1):
-        print(' ' * i + SYMBOL_GRAPH)
+    strip_l = ''
+    for i in range(HEIGHT_GRAPH * 2, -1, -1):
+        line = (f'{i:>2}' + '--' * i + SYMBOL_GRAPH)
+        print(line + strip_l)
+        if i % 2 == 0:
+            strip_l = '| ' + strip_l
+        else:
+            strip_l = '  ' + strip_l
+    line = '   0'
+    for i in range(1, HEIGHT_GRAPH + 1):
+        line += f'---{i}'
+    print(line)
 
 
 def draw_chart():
@@ -90,7 +109,7 @@ def main():
     while True:
         funcs[i]()
         i = (i + 1) % len(funcs)
-        sleep(1)
+        sleep(SWAP_SLIDE_TIME)
         os.system("cls")
 
 
